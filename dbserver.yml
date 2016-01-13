@@ -1,0 +1,17 @@
+---
+- hosts: dbservers
+  remote_user: pi
+  become: yes
+  become_method: sudo
+
+  #connection: local
+  #gather_facts: no
+  vars:
+      users:
+        chandan:
+            name: chandan chowdhury
+            groups: users,sudo
+            authorized_key: Chandan_id_rsa.pub
+
+  roles:
+      - create_users
