@@ -1,0 +1,12 @@
+[pi]
+192.168.0.11
+
+
+[pi:vars]
+ansible_ssh_user=pi
+
+[webservers]
+192.168.0.11
+
+[dbservers]
+192.168.0.11
