@@ -2,8 +2,6 @@
 - name: Add users
   #debug: msg="User {{ item.key }} has name of {{ item.value.name }} \n Groups is {{ item.value.groups }} \n Public Key File is {{ item.value.authorized_key }}"
   user: name={{ item.key }} groups={{ item.value.groups }} password='$6$ayh.YE95$UUTSpUGsDvM2A.RPraAGkdLPelMHPzvIP7O8EJ.GhuHS1QFhtuEwc9aRDyu5nlywLEIQztRz6C159r.cHntxA/'
-  # Add an encrypted default password
-
   with_dict: users
 
 - name: Create SSH directory
