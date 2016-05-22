@@ -1,0 +1,22 @@
+# meta file for locales
+---
+galaxy_info:
+  author: 
+  company: 
+  description: 
+  license: 
+  min_ansible_version: 1.6
+  platforms:
+    - name: OS A
+      versions:
+        - verion 3
+        - verion 2
+        - verion 1
+    - name: OS B
+      versions:
+        - verion 3
+        - verion 2
+        - verion 1
+  galaxy_tags:
+    - system
+dependencies: []

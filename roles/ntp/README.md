@@ -1,6 +1,8 @@
 # NTP 
-Setup and start NTP
+Install, Setup and Start NTP Server
 
 Tasks:
-1. Setup NTP
-2. Start NTP
+1. Install NTP
+2. Make sure timezone is set to America/Chicago
+3. Setup NTP
+4. Start NTP
