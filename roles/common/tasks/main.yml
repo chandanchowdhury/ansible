@@ -1,0 +1,62 @@
+- name: IPTables Install
+  apt: pkg=iptables state=latest
+  tags: iptables
+
+- name: IPTables setup
+  # copy the IPTables rules to /etc/network/if-up.d so that the rules are applied as soon as interface is up
+  template: 
+    src: iptables.sh.j2
+    dest: /etc/network/if-up.d/iptables.sh
+    owner: root
+    group: root
+    mode: 0740
+  register: iptables
+  tags: iptables
+
+#- name: Restart all network interfaces except loopback device
+#  command: bash -c "ifdown eth0 && ifup eth0"
+  #shell: "ifdown --exclude=lo -a; sleep 1; ifup --exclude=lo -a"
+#  when: iptables.changed
+
+- name: Apply the rules
+  command: bash -c "/etc/network/if-up.d/iptables.sh"
+  #shell: "ifdown --exclude=lo -a; sleep 1; ifup --exclude=lo -a"
+  when: iptables.changed
+
+    #
+    #- name: Autoclean
+    #  command: apt-get autoclean
+
+    # Update package list if more than 24 hours old
+- name: Update package list
+  apt: update_cache=yes cache_valid_time=86400
+
+- name: Upgrade installed packages
+  apt: upgrade=dist
+  async: 25
+  poll: 10
+    # register so that others can use result
+  register: apt_get_upgrade
+
+- name: Restart machine
+  command: shutdown -r now "Ansible updates triggered"
+  async: 25
+  poll: 10
+  ignore_errors: true
+    # only restart when something changed
+  when: apt_get_upgrade.changed
+
+#- name: waiting for server to come back
+#  local_action: wait_for host={{ inventory_hostname }} state=started
+
+
+- name: Required softwares
+  apt: pkg={{item}} state=latest
+  with_items: "{{required_software}}"
+  tags: softwares
+
+
+
+
+
+

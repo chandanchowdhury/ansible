@@ -1,0 +1,5 @@
+---
+# Required softwares
+required_software: 
+  - git
+  - fail2ban

@@ -1,0 +1,27 @@
+- name: Set timezome to America/Chicago
+  command: echo "America/Chicago" > /etc/timezome
+  
+- name: Install NTP
+  apt: pkg=ntp state=latest
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  notify: Configure NTP
+  register: ntp_install
+  tags: ntp
+
+- name: Configure NTP
+  template: src=ntp.conf.j2   dest=/etc/ntp.conf
+    # When NTP is configured successfully, call the handler to restart NTPd
+  notify: Restart NTPd
+  when: ntp_install.changed
+  register: ntp_config
+  tags: ntp
+
+- name: Restart NTPd
+  service: name=ntp enabled=yes state=running
+  when: ntp_config.changed
+  tags: ntp
+
+
+
+
+
