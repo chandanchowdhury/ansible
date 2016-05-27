@@ -1,0 +1,59 @@
+#!/bin/sh
+# A very basic IPtables / Netfilter script
+
+PATH='/sbin'
+
+# Flush the tables to apply changes
+iptables -F
+iptables -X
+
+
+# Allow established connections
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Allow local programs that use loopback (Unix sockets)
+iptables -A INPUT -s 127.0.0.0/8 -d 127.0.0.0/8 -i lo -j ACCEPT
+
+# Allow incoming SSH connection
+iptables -A INPUT -p tcp --dport 8422 -m state --state NEW -j ACCEPT
+
+# Allow incoming HTTP(S) connection
+iptables -A INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -m state --state NEW -j ACCEPT
+
+# Allow output only to known ports, prevent rogue connection to arbitary ports
+# Allow SSH out going replies
+iptables -A OUTPUT -p tcp --sport 8422 -m state --state NEW -j ACCEPT
+# Alow NTP out going
+iptables -A OUTPUT -p udp --dport 123 -m state --state NEW -j ACCEPT
+# Allow DNS query
+iptables -A OUTPUT -p udp --dport 53 -m state --state NEW -j ACCEPT
+# Allow outgoing HTTP/s 
+iptables -A OUTPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -m state --state NEW -j ACCEPT
+
+
+# Create a new chain called INPUT-LOGGING
+iptables -N INPUT-LOGGING
+# All the remaining incoming packets will jump to the INPUT-LOGGING chain
+iptables -A INPUT -j INPUT-LOGGING
+# Log the incoming packets to syslog
+iptables -A INPUT-LOGGING -m limit --limit 5/min -j LOG --log-prefix "IPTables-Input-Dropped: " --log-level 4
+# Finally drop all the packets that came to the INPUT-LOGGING 
+iptables -A INPUT-LOGGING -j DROP
+
+# Dropped output packets are more problematic, they can cause 
+# Create a new chain called OUTPUT-LOGGING
+iptables -N OUTPUT-LOGGING
+# All the remaining incoming packets will jump to the INPUT-LOGGING chain
+iptables -A OUTPUT -j INPUT-LOGGING
+# Log the incoming packets to syslog
+iptables -A OUTPUT-LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables-Output-Dropped: " --log-level 7
+# Finally drop all the packets that came to the INPUT-LOGGING 
+iptables -A OUTPUT-LOGGING -j DROP
+
+# Default policy to drop 'everything'
+iptables -P FORWARD DROP
+iptables -P INPUT   DROP
+iptables -P OUTPUT  DROP

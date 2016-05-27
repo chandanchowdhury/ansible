@@ -1,13 +1,23 @@
 ---
 - name: Add users
   #debug: msg="User {{ item.key }} has name of {{ item.value.name }} \n Groups is {{ item.value.groups }} \n Public Key File is {{ item.value.authorized_key }}"
-  user: name={{ item.key }} groups={{ item.value.groups }} password='$6$ayh.YE95$UUTSpUGsDvM2A.RPraAGkdLPelMHPzvIP7O8EJ.GhuHS1QFhtuEwc9aRDyu5nlywLEIQztRz6C159r.cHntxA/'
+  user: 
+    name: {{ item.key }} 
+    groups: {{ item.value.groups }} 
+    password: '$6$ayh.YE95$UUTSpUGsDvM2A.RPraAGkdLPelMHPzvIP7O8EJ.GhuHS1QFhtuEwc9aRDyu5nlywLEIQztRz6C159r.cHntxA/'
   with_dict: users
+  register: add_user
 
 - name: Create SSH directory
-  file: path='/home/{{ item.key }}/.ssh' state=directory mode=0755
-  #command: mkdir '/home/{{ item.key }}/.ssh'
+  file: 
+    path: '/home/{{ item.key }}/.ssh' state=directory 
+    mode: 0744
+    owner: {{  item.key }}
+    group: {{ item.value.groups }}
+    #command: mkdir '/home/{{ item.key }}/.ssh'
   with_dict: users
+  when: add_user.changed
+  register: create_ssh_directory
 
 #- name: Change owner of directory to the user
   #command: chown {{ item.key }} '/home/{{ item.key }}/.ssh'
@@ -15,6 +25,11 @@
 
 - name: Copy keys
   #authorized_key: user={{ item.key }} key={{ lookup('file', 'files/{{ item.value.authorized_key }}') }}
-  copy: src='files/{{ item.value.authorized_key }}' dest='/home/{{ item.key }}/.ssh/id_rsa.pub'
-    owner={{ item.key }} mode="u=rw,g=r,o=r"
+  copy: 
+    src: 'files/{{ item.value.authorized_key }}' 
+    dest: '/home/{{ item.key }}/.ssh/id_rsa.pub'
+    owner: {{ item.key }} 
+    group: {{ item.value.groups }}
+    mode: "u=rw,g=r,o=r"
   with_dict: users
+  when: create_ssh_directory.changed

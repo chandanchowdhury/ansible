@@ -5,8 +5,8 @@
 - name: IPTables setup
   # copy the IPTables rules to /etc/network/if-up.d so that the rules are applied as soon as interface is up
   template: 
-    src: iptables.sh.j2
-    dest: /etc/network/if-up.d/iptables.sh
+    src: iptables.j2
+    dest: /etc/network/if-up.d/iptables
     owner: root
     group: root
     mode: 0740
@@ -19,7 +19,7 @@
 #  when: iptables.changed
 
 - name: Apply the rules
-  command: bash -c "/etc/network/if-up.d/iptables.sh"
+  command: bash -c "/etc/network/if-up.d/iptables"
   #shell: "ifdown --exclude=lo -a; sleep 1; ifup --exclude=lo -a"
   when: iptables.changed
 

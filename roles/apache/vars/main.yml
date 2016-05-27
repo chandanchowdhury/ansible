@@ -1,0 +1,5 @@
+---
+# List packages required for apache and its related
+pkglist:
+  - apache2
+  - openssl

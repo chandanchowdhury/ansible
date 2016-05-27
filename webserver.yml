@@ -1,0 +1,29 @@
+---
+- name: Apply webserver config to all nodes
+  hosts: webservers
+  remote_user: root
+  become: yes
+  become_method: sudo
+  roles:
+    - ansible-locales
+    - common
+    - ntp
+    - create_users
+    - apache
+
+  vars:
+    users:
+      chandan:
+        name: chandan chowdhury
+        groups: users,sudo
+        authorized_key: Chandan_id_rsa.pub
+      somnath: 
+        name: somnath chowdhury
+        groups: users,sudo
+    vhost:
+      vhost1:
+        fqdn: default
+        DocRoot: /var/www/html
+      vhost2:
+        fqdn: somnathchowdhury.me
+        DocRoot: /home/somnath/web_root

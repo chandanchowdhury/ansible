@@ -1,0 +1,69 @@
+---
+- name: Install packages
+  apt: pkg={{ item }} state=latest
+  with_items: "{{ pkglist }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  register: apache2_install
+  tags: apache2, install
+
+- name: Copy apache2.conf
+  copy:
+    src: apache2/apache2.conf
+    dest: /etc/apache2/apache2.conf
+    owner: root
+    group: root
+    mode: 0640
+  #when: apache2_install.changed
+  tags: apache2, config
+
+- name: Copy conf-enabled
+  copy:
+    src: apache2/conf-enabled/
+    dest: /etc/apache2/conf-enabled/
+    owner: root
+    group: root
+    mode: 0640
+  #when: apache2_install.changed
+  tags: apache2, config
+
+
+- name: Copy sites-enabled
+  copy:
+    src: apache2/sites-enabled/
+    dest: /etc/apache2/sites-enabled/
+    owner: root
+    group: root
+    mode: 0640
+  tags: apache2, config
+
+- name: Create SSL certificates directory
+  file: 
+    path: "/etc/ssl/apache2/certs" 
+    state: directory 
+    mode: 0744
+    owner: root
+    group: root
+
+- name: Create SSL private key directory
+  file: 
+    path: "/etc/ssl/apache2/private" 
+    state: directory
+    mode: 0744
+    owner: root
+    group: root
+
+- name: Create self-signed SSL cert
+  command: openssl req -new -nodes -x509 -subj "/C=IN/ST=Karnataka/L=Bangalore/O=Self/CN={{item.value.fqdn}}" -days 365 -keyout /etc/ssl/apache2/private/{{item.value.fqdn}}.key -out /etc/ssl/apache2/certs/{{item.value.fqdn}}.pem -extensions v3_ca creates=/etc/ssl/apache2/certs/{{item.value.fqdn}}.pem
+  with_dict: "{{ vhost }}"
+  notify: Apache2 restart
+
+- name: Apache2 restart
+  service: name=apache2 enabled=yes state=restarted
+  tags: apache2, restart
+
+#- name: Apache2 Reload
+#  service: name=apache2 enabled=yes state=reloaded
+#  tags: apache2, reload
+
+
+

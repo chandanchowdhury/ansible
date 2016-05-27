@@ -3,3 +3,10 @@
 required_software: 
   - git
   - fail2ban
+  - python
+  - python-pip
+  - libapache2-mod-wsgi
+  - python-virtualenv
+  #- python-dev
+  
+  

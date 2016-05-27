@@ -1,0 +1,16 @@
+# meta file for locales
+---
+galaxy_info:
+  author: i_virus
+  company: 
+  description: Ansible role to setup apache
+  license: Apache
+  min_ansible_version: 1.6
+  platforms:
+    - name: Debian
+      versions:
+        - Jessie
+  galaxy_tags:
+    - system
+    - apache
+dependencies: []
